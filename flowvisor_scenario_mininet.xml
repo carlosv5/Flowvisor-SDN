@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+~~~~~~~~~~~~~~~~~~~~~~
+ VNX Sample scenarios
+~~~~~~~~~~~~~~~~~~~~~~
+
+Name:        flowvisor_scenario_mininet
+
+Description: 
+
+Author:   Ignacio Gomez Saez and Carlos Vega Garcia
+
+-->
+
+<vnx xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:noNamespaceSchemaLocation="/usr/share/xml/vnx/vnx-2.00.xsd">
+  <global>
+    <version>2.0</version>
+    <scenario_name>flowvisor_scenario_mininet</scenario_name>
+    <automac/>
+    <vm_mgmt type="none" />
+    <vm_defaults>
+        <console id="0" display="no"/>
+        <console id="1" display="yes"/>
+    </vm_defaults>
+  </global>
+
+  <net name="s1" mode="openvswitch" managed="no" controller="tcp:127.0.0.1:6633" />
+  <net name="s2" mode="openvswitch" managed="no" controller="tcp:127.0.0.1:6633"/>
+  <net name="s3" mode="openvswitch" managed="no" controller="tcp:127.0.0.1:6633"/>
+  <net name="s4" mode="openvswitch" managed="no" controller="tcp:127.0.0.1:6633"/>
+
+
+
+   <vm name="h1" type="lxc" exec_mode="lxc-attach" arch="x86_64">
+    <filesystem type="cow">/usr/share/vnx/filesystems/rootfs_lxc_ubuntu64</filesystem>
+    <if id="1" net="s1">
+      <mac>00:00:00:00:00:01</mac>
+      <ipv4>10.0.0.1/24</ipv4>
+    </if>
+
+    <!-- Copy /etc/hosts file -->
+    <filetree seq="on_boot" root="/tmp/">conf/hosts</filetree>
+    <exec seq="on_boot" type="verbatim">
+        cat /tmp/hosts >> /etc/hosts
+        rm /tmp/hosts
+    </exec>
+
+  </vm>
+
+     <vm name="h2" type="lxc" exec_mode="lxc-attach" arch="x86_64">
+    <filesystem type="cow">/usr/share/vnx/filesystems/rootfs_lxc_ubuntu64</filesystem>
+    <if id="1" net="s1">
+        <mac>00:00:00:00:00:02</mac>
+      <ipv4>10.0.0.2/24</ipv4>
+    </if>
+
+        <!-- Copy /etc/hosts file -->
+    <filetree seq="on_boot" root="/tmp/">conf/hosts</filetree>
+    <exec seq="on_boot" type="verbatim">
+        cat /tmp/hosts >> /etc/hosts
+        rm /tmp/hosts
+    </exec>
+     </vm>
+
+          <vm name="h3" type="lxc" exec_mode="lxc-attach" arch="x86_64">
+    <filesystem type="cow">/usr/share/vnx/filesystems/rootfs_lxc_ubuntu64</filesystem>
+    <if id="1" net="s4">
+        <mac>00:00:00:00:00:03</mac>
+      <ipv4>10.0.0.3/24</ipv4>
+    </if>
+
+        <!-- Copy /etc/hosts file -->
+    <filetree seq="on_boot" root="/tmp/">conf/hosts</filetree>
+    <exec seq="on_boot" type="verbatim">
+        cat /tmp/hosts >> /etc/hosts
+        rm /tmp/hosts
+    </exec>
+     </vm>
+
+          <vm name="h4" type="lxc" exec_mode="lxc-attach" arch="x86_64">
+    <filesystem type="cow">/usr/share/vnx/filesystems/rootfs_lxc_ubuntu64</filesystem>
+    <if id="1" net="s4">
+        <mac>00:00:00:00:00:04</mac>
+      <ipv4>10.0.0.4/24</ipv4>
+    </if>
+
+        <!-- Copy /etc/hosts file -->
+    <filetree seq="on_boot" root="/tmp/">conf/hosts</filetree>
+    <exec seq="on_boot" type="verbatim">
+        cat /tmp/hosts >> /etc/hosts
+        rm /tmp/hosts
+    </exec>
+     </vm>
+
+  <host>
+        <!-- Permissions -->
+    <exec seq="on_boot" type="verbatim">
+	chmod +x ./*.py ./*.sh
+    </exec>
+    <exec seq="start-all-scenario1" type="verbatim"  ostype="system">
+        /etc/init.d/flowvisor stop
+        /etc/init.d/flowvisor restart
+        sleep 4        
+        xterm -title "Creating slices and add-flows" -e "python ./create_slices_and_add_flows_mininet_scenario1.py" &amp;
+        ./start_controllers.sh
+    </exec>
+
+    <exec seq="start-all-scenario2" type="verbatim"  ostype="system">
+        /etc/init.d/flowvisor stop
+        /etc/init.d/flowvisor restart 
+        sleep 4       
+        xterm -title "Creating slices and add-flows" -e "python ./create_slices_and_add_flows_mininet_scenario2.py" &amp;
+        ./start_controllers.sh
+    </exec>
+
+    <exec seq="destroy-all-scenario1" type="verbatim"  ostype="system">
+	fvctl -f /dev/null remove-slice upper
+	fvctl -f /dev/null remove-slice lower
+        /etc/init.d/flowvisor stop        
+        pkill -9 -f pox.py
+    </exec>
+
+    <exec seq="destroy-all-scenario2" type="verbatim"  ostype="system">
+	fvctl -f /dev/null remove-slice video
+	fvctl -f /dev/null  remove-slice non-video
+        /etc/init.d/flowvisor stop        
+        pkill -9 -f pox.py
+    </exec>
+  </host>
+
+</vnx>
