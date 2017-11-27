@@ -17,19 +17,27 @@ In order to run the scenarios, these are the steps:
 4. In order to start one of the scenarios, you have to write the commands:
 
 Switch of virtual machines:
+
 sudo vnx -f Name_of_scenario.xml -v -t
  
 Simple scenario (slices upper y lower):
+
 sudo vnx -f Name_of_scenario.xmll -x start-all-scenario1
+
 Complex scenario (slices video y non-video)
+
 sudo vnx -f Name_of_scenario.xml -x start-all-scenario2
  
 Destroy the scenario:
+
 sudo vnx -f Name_of_scenario.xml -x destroy-all-scenario1
+
 sudo vnx -f Name_of_scenario.xml -x destroy-all-scenario2
  
 Switch off virtual machines:
+
 sudo vnx -f Name_of_scenario.xml --destroy
 
 There are you scenarios (two xml files), the second one joins mininet with vnx, so you have to start mininet before starting the scenario:
+
 sudo mn --custom flowvisor_topo_vnx.py --topo fvtopo --link tc --controller remote --mac --arp
